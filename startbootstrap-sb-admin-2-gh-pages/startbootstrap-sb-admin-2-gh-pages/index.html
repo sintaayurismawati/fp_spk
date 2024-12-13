@@ -25,6 +25,9 @@
 
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet" />
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <link href="own_css/index.css" rel="stylesheet" />
   </head>
 
   <body id="page-top">
@@ -40,7 +43,9 @@
           class="sidebar-brand d-flex align-items-center justify-content-center"
           href="index.html"
         >
-          <div class="sidebar-brand-text mx-3">Online Course Recommendation</div>
+          <div class="sidebar-brand-text mx-3">
+            Online Course Recommendation
+          </div>
         </a>
 
         <!-- Divider -->
@@ -58,7 +63,7 @@
         <hr class="sidebar-divider" />
 
         <li class="nav-item active">
-          <a class="nav-link" href="index.html">
+          <a class="nav-link" href="kriteria.html">
             <i class="fa fa-list-ol"></i>
             <span>Kriteria</span></a
           >
@@ -629,7 +634,6 @@
                     >
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
@@ -703,5 +707,25 @@
     <!-- Page level custom scripts -->
     <script src="js/demo/chart-area-demo.js"></script>
     <script src="js/demo/chart-pie-demo.js"></script>
+    <script>
+      // Mobile sidebar toggle
+      $(document).ready(function () {
+        $("#sidebarToggle").on("click", function () {
+          $("#accordionSidebar").toggleClass("show");
+        });
+
+        // Close sidebar when clicking outside on mobile
+        $(document).on("click", function (event) {
+          if ($(window).width() <= 768) {
+            if (
+              !$(event.target).closest("#accordionSidebar, #sidebarToggle")
+                .length
+            ) {
+              $("#accordionSidebar").removeClass("show");
+            }
+          }
+        });
+      });
+    </script>
   </body>
 </html>
