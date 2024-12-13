@@ -4,6 +4,8 @@ const supabaseKey =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxZHFhbmpkcnJzb2twbmpwanBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMyMjIxNzIsImV4cCI6MjA0ODc5ODE3Mn0.mldA8vWRcbH-vikkKDBz836-l8p_2lhKkP9STZ1l2b4";
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+fetchAllKriteria();
+
 async function fetchAllKriteria() {
   let { data, error } = await supabase.rpc("get_all_kriteria");
   if (error) console.error(error);
@@ -34,7 +36,7 @@ function showAllKriteria(kriteriaList) {
             <h5 class="card-title">${kriteria.nama_kriteria}</h5>
             <p class="card-text">Bobot : ${kriteria.bobot}</p>
             <div class="d-flex justify-content-end">
-                <a href="#" class="btn btn-primary">Detail</a>
+                <a href="#" class="btn btn-primary" onclick="goToDetailPage(${kriteria.id})">Detail</a>
             </div>
         </div>
     </div>
@@ -44,4 +46,7 @@ function showAllKriteria(kriteriaList) {
   });
 }
 
-fetchAllKriteria();
+function goToDetailPage(kriteriaId) {
+  // Redirect to the detail page with the kriteria id as a query parameter
+  window.location.href = `../own_html/detail_kriteria.html?id=${kriteriaId}`;
+}
