@@ -5,12 +5,9 @@ const supabaseKey =
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 async function fetchAllKriteria() {
-  const { data, error } = await supabase.from("kriteria").select("*");
-
-  if (error) {
-    console.error("Error fetching data:", error);
-    return;
-  }
+  let { data, error } = await supabase.rpc("get_all_kriteria");
+  if (error) console.error(error);
+  else console.log(data);
 
   console.log("Semua data kriteria:", data);
   showAllKriteria(data);
@@ -35,7 +32,7 @@ function showAllKriteria(kriteriaList) {
         />
         <div class="card-body">
             <h5 class="card-title">${kriteria.nama_kriteria}</h5>
-            <p class="card-text">Bobot : 0,005</p>
+            <p class="card-text">Bobot : ${kriteria.bobot}</p>
             <div class="d-flex justify-content-end">
                 <a href="#" class="btn btn-primary">Detail</a>
             </div>
