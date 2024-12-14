@@ -227,19 +227,19 @@
               class="d-sm-flex align-items-center justify-content-between mb-4"
             >
               <div class="col-md-6 text-center">
-                <!-- Gambar Kriteria -->
                 <img
-                  src="path/to/your/image.jpg"
+                  id="imgKriteria"
+                  src=""
                   alt="Kriteria Image"
                   class="img-fluid"
                 />
-                <!-- Bobot Kriteria -->
-                <p><strong>Bobot Kriteria: 80%</strong></p>
+                <p id="kodeKriteria"><strong></strong></p>
+                <p id="bobotKriteria"><strong></strong></p>
               </div>
 
               <div class="col-md-6">
                 <!-- Nama Kriteria -->
-                <div class="form-group">
+                <div class="form-group" id="detail-kriteria-container">
                   <label for="namaKriteria">Nama Kriteria</label>
                   <input
                     type="text"
@@ -278,7 +278,7 @@
                     disabled
                   />
                 </div>
-                
+
                 <!-- button -->
                 <div class="d-flex justify-content-end">
                   <button class="btn btn-primary me-2 mr-3" id="editButton">
@@ -384,6 +384,6 @@
         });
       });
     </script>
-    <!-- <script src="../own_js/kriteria.js"></script> -->
+    <script src="../own_js/detail_kriteria.js"></script>
   </body>
 </html>
