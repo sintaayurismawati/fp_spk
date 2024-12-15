@@ -30,6 +30,7 @@ async function fetchDetailKriteria(kriteriaId) {
     // Proses hanya baris pertama dari data
     if (data && data.length > 0) {
       showDetailKriteria(data[0]); // Hanya baris pertama
+      showSkalaKriteria(data);
     } else {
       console.warn("No data found for the given ID.");
     }
@@ -51,4 +52,33 @@ function showDetailKriteria(detailKriteria) {
   document.getElementById("prioritasKriteria").value = detailKriteria.prioritas;
   document.getElementById("jenisKriteria").value =
     detailKriteria.jenis_kriteria;
+}
+
+function showSkalaKriteria(listSkala) {
+  const skalaKriteriaContainer = document.getElementById(
+    "skala-kriteria-container"
+  );
+  while (skalaKriteriaContainer.firstChild) {
+    skalaKriteriaContainer.removeChild(skalaKriteriaContainer.firstChild);
+  }
+
+  listSkala.forEach((skala) => {
+    const skalaData = document.createElement("div");
+    skalaData.className = "d-flex align-items-center mb-3";
+
+    skalaData.innerHTML = `
+    <label for="skalaKriteria" class="me-2 mb-0" style="flex-shrink: 0">
+        ${skala.urutan_skala} :
+    </label>
+    <input
+      type="text"
+      class="form-control ms-2"
+      value= "${skala.keterangan}"
+      disabled
+      style="margin-left: 10px"
+    />
+    `;
+
+    skalaKriteriaContainer.appendChild(skalaData);
+  });
 }
