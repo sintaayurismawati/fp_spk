@@ -223,21 +223,91 @@
           <!-- Begin Page Content -->
           <div class="container-fluid">
             <!-- Page Heading -->
-            <div
-              class="d-sm-flex align-items-center justify-content-between mb-4"
-            >
-              <h1 class="h3 mb-0 text-gray-800">Daftar Kriteria</h1>
-              <a
-                href="tambah_data.html"
-                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"
-                ><i class="fas fa-sm text-white-50"></i>
-                Tambah Data</a
-              >
+            <div class="d-sm-flex flex-column justify-content-between mb-4">
+              <h1 class="h3 mb-5 text-gray-800">Form Tambah Data</h1>
+              <div class="col-md-6">
+                <!-- Nama Kriteria -->
+                <div class="form-group" id="detail-kriteria-container">
+                  <label for="namaKriteria">Nama Kriteria</label>
+                  <input type="text" id="namaKriteria" class="form-control" />
+
+                  <label for="prioritasKriteria" class="mt-4"
+                    >Prioritas Kriteria</label
+                  >
+                  <input
+                    type="text"
+                    id="prioritasKriteria"
+                    class="form-control"
+                  />
+
+                  <label for="jenisKriteria" class="mt-4">Jenis Kriteria</label>
+                  <select id="jenisKriteria" class="form-control">
+                    <option value="biaya">Biaya</option>
+                    <option value="keuntungan">Keuntungan</option>
+                  </select>
+
+                  <label for="uploadGambar" class="mt-4">Gambar Profil Kriteria</label>
+                  <input
+                    type="file"
+                    id="uploadGambar"
+                    class="form-control"
+                    style="height: 45px"
+                    accept="image/*"
+                  />
+
+                  <label for="skalaKriteria" class="mt-4"
+                    >Skala Kriteria (Opsional)</label
+                  >
+                  <div class="col" id="skala-kriteria-container">
+                    <div class="d-flex align-items-center mb-3">
+                      <label
+                        for="skalaKriteria1"
+                        class="me-2 mb-0"
+                        style="flex-shrink: 0"
+                      >
+                        1 :
+                      </label>
+                      <input
+                        id="skalaKriteria1"
+                        type="text"
+                        class="form-control ms-2"
+                        style="margin-left: 10px"
+                      />
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                      <label
+                        for="skalaKriteria2"
+                        class="me-2 mb-0"
+                        style="flex-shrink: 0"
+                      >
+                        2 :
+                      </label>
+                      <input
+                        id="skalaKriteria2"
+                        type="text"
+                        class="form-control ms-2"
+                        style="margin-left: 10px"
+                      />
+                    </div>
+                    <button
+                      class="btn btn-add"
+                      id="add-btn"
+                      onclick="addSkalaKriteria()"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <!-- button -->
+                <div class="d-flex justify-content-end">
+                  <button class="btn btn-primary me-2 mr-3" id="simpanButton">
+                    Simpan
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-
-          <!-- Cards Section -->
-          <div class="row ml-3 mr-3" id="kriteria-container"></div>
 
           <!-- /.container-fluid -->
         </div>
@@ -328,6 +398,6 @@
         });
       });
     </script>
-    <script src="../own_js/kriteria.js"></script>
+    <script src="../own_js/tambah_data.js"></script>
   </body>
 </html>
