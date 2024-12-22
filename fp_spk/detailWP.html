@@ -97,9 +97,9 @@
           <h2 style="margin: 50px;">Tabel Perhitungan Wp</h2>
         </div>
 
-        <div class="row w-75 mx-auto">
+        <div class="row w-75 mx-auto p-3">
 
-          <div class="card w-100 mb-3 shadow">
+          <div class="card w-100 mb-3 shadow"   style="  overflow-x: scroll;">
             <div class="card-head">
               <h3 class="m-3">Metrix</h3>
             </div>
@@ -111,20 +111,16 @@
                       <th rowspan="2">No</th>
                       <th rowspan="2">Nama</th> <!-- Gabungkan dua baris ke bawah -->
                       <th colspan="5">Kriteria</th> <!-- Gabungkan lima kolom ke samping -->
-                    </tr>
-                    <tr>
-                      <th>C1</th>
-                      <th>C2</th>
-                      <th>C3</th>
-                      <th>C4</th>
-                      <th>C5</th>
-                      <th rowspan="2">Bobot</th>
-                    </tr>
-                    <tr>
+
 
                     </tr>
+                    <tr id="krit-head">
+
+
+                    </tr>
+
                   </thead>
-                  <tbody>
+                  <tbody id="krit-body">
 
                   </tbody>
                 </table>
@@ -142,7 +138,24 @@
             </div>
 
             <div class="card-body border border-primary rounded mx-auto mb-3" style="width:90%;
-            height: 250px;">
+            height: fit-content;">
+              <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>Kode Alternatif</th>
+                      <th>Kode Kriteria</th> <!-- Gabungkan lima kolom ke samping -->
+                      <th>Nilai</th> <!-- Gabungkan dua baris ke bawah -->
+                      <th>S</th> <!-- Gabungkan lima kolom ke samping -->
+
+
+                    </tr>
+                  </thead>
+                  <tbody id="body-s">
+
+                  </tbody>
+                </table>
+              </div>
 
             </div>
           </div>
@@ -151,12 +164,30 @@
         <div class="row w-75 mx-auto  border-secondary mb-3 shadow">
           <div class="card w-100">
             <div class="card-head">
-              <h2 class="m-3">Vektor Y</h2>
+              <h2 class="m-3">Vektor V</h2>
 
             </div>
 
             <div class="card-body border border-primary rounded mx-auto mb-3" style="width:90%;
-            height: 250px;">
+            height: fit-content;">
+
+              <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>Kode Alternatif</th>
+
+                      <th>Nilai</th> <!-- Gabungkan dua baris ke bawah -->
+
+
+
+                    </tr>
+                  </thead>
+                  <tbody id="body-v">
+
+                  </tbody>
+                </table>
+              </div>
 
             </div>
           </div>
@@ -239,6 +270,169 @@
   <!-- Page level custom scripts -->
 
   <script src="js/demo/chart-bar-demo.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+
+    const { createClient } = supabase
+    const supabaseUrl = 'https://cqdqanjdrrsokpnjpjpj.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxZHFhbmpkcnJzb2twbmpwanBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMyMjIxNzIsImV4cCI6MjA0ODc5ODE3Mn0.mldA8vWRcbH-vikkKDBz836-l8p_2lhKkP9STZ1l2b4'
+
+    const _supabase = createClient(supabaseUrl, supabaseKey)
+
+    console.log(_supabase);
+
+    async function getAllAHP() {
+
+      const { data: ahp, error: error3 } = await _supabase.rpc('get_pivot_ahp_matriks')
+
+      console.log(ahp)
+
+      const { data: kriteria, error } = await _supabase
+        .from('kriteria')
+        .select(`
+        *
+        AHP_normalisasi (
+          *
+        )
+      `);
+
+
+
+      let { data: alternatif, error2 } = await _supabase
+        .from('alternatif')
+        .select('*')
+
+
+
+
+
+
+      if (error) {
+        console.error("Error fetching kriteria:", error);
+        return;
+      }
+
+      // Generate table headers
+      const kritHead = document.getElementById('krit-head');
+      const firstRowHeaders = Object.keys(ahp[0].alternatives); // Dapatkan nama alternatif
+      firstRowHeaders.forEach(alternative => {
+        const th = document.createElement('th');
+        th.textContent = alternative;
+        kritHead.appendChild(th);
+      });
+
+      const thBobot = document.createElement('th');
+      thBobot.rowSpan = 2; // Set rowSpan
+      thBobot.textContent = 'Bobot'; // Set textContent
+      kritHead.appendChild(thBobot); // Tambah
+
+      const thJenis = document.createElement('th');
+      thJenis.rowSpan = 2; // Set rowSpan
+      thJenis.textContent = 'Jenis'; // Set textContent
+      kritHead.appendChild(thJenis); // Tambah
+
+
+
+
+      // Generate table rows
+      const kritBody = document.getElementById('krit-body');
+      let previousRendered = {}; // Cache untuk menghindari pengulangan ahp
+
+      ahp.forEach((row, index) => {
+        // Cek apakah kombinasi sudah dirender sebelumnya
+        const key = `${row.nama_kriteria}-${row.jenis_kriteria}-${row.bobot}`;
+        if (previousRendered[key]) {
+          return; // Lewati jika kombinasi sudah dirender
+        }
+
+        previousRendered[key] = true; // Tandai sebagai sudah dirender
+
+        const tr = document.createElement('tr');
+
+
+
+        // Kolom nomor
+        const tdNo = document.createElement('td');
+        tdNo.textContent = index + 1;
+        tr.appendChild(tdNo);
+
+        // Kolom nama kriteria
+        const tdNama = document.createElement('td');
+        tdNama.textContent = row.nama_kriteria;
+        tr.appendChild(tdNama);
+
+
+        // Kolom nilai alternatif
+        firstRowHeaders.forEach(alternative => {
+          const td = document.createElement('td');
+          td.textContent = row.alternatives[alternative] || 0; // Nilai default 0 jika tidak ada data
+          tr.appendChild(td);
+        });
+
+
+        
+        // Kolom bobot
+        const tdBobot = document.createElement('td');
+        tdBobot.textContent = row.bobot.toFixed(2); // Format bobot menjadi dua desimal
+        tr.appendChild(tdBobot);
+
+        // Kolom jenis kriteria
+        const tdJenis = document.createElement('td');
+        tdJenis.textContent = row.jenis_kriteria;
+        tr.appendChild(tdJenis);
+
+
+
+        // Tambahkan baris ke body tabel
+        kritBody.appendChild(tr);
+      });
+
+
+
+
+    }
+
+    async function getAllVektorS(params) {
+      const { data: vektorS, error } = await _supabase
+        .from('WP_vektor_s')
+        .select(`*`);
+
+      vektorS.forEach((item, index) => {
+        const te = document.createElement("tr");
+        te.innerHTML = `
+          <td>${item.kode_alternatif}</td>
+          <td>${item.kode_kriteria}</td>
+          <td>${item.nilai}</td>
+          <td>${item.s}</td>
+
+        `;
+        document.querySelector('#body-s').appendChild(te);
+      })
+    }
+    async function getAllVektorV(params) {
+      const { data: vektorS, error } = await _supabase
+        .from('WP_vektor_v')
+        .select(`*`);
+
+      vektorS.forEach((item, index) => {
+        const te = document.createElement("tr");
+        te.innerHTML = `
+          <td>${item.kode_alternatif}</td>
+          <td>${item.nilai}</td>
+         
+
+        `;
+        document.querySelector('#body-v').appendChild(te);
+      })
+    }
+
+    getAllAHP()
+    getAllVektorS()
+    getAllVektorV()
+
+  </script>
+
+
 </body>
 
 </html>

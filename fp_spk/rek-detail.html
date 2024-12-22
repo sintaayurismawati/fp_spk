@@ -95,13 +95,13 @@
       <div id="content" class=" h-fit ">
         <div class="row h-50">
           <div class="col-lg-6 d-flex align-items-center justify-content-center">
-            <img src="img/box.png" alt="" class="img-fluid" width="250" height="250">
+            <img id="course-img" src="img/box.png" alt="" class="img-fluid" width="250" height="250">
           </div>
           <div class="col-lg-6 d-flex flex-column justify-content-center">
             <h3 class="text-dark">Rekomendasi Course</h3>
-            <p>Altera Academy</p>
+            <p id="course-title">Altera Academy</p>
             <h3 class="text-dark">Hasil WP</h3>
-            <p>100%</p>
+            <p id="course-percentage">100%</p>
           </div>
         </div>
 
@@ -114,19 +114,14 @@
                     <th>Kriteria</th>
 
 
-                    <th>Nilai</th>
+                    <th colspan="5">Keterangan</th>
 
                   </tr>
                 </thead>
-                <tfoot>
-                  <tr>
-                    <th>Kriteria</th>
+                <tbody id="krit-body">
 
+                </tbody>
 
-                    <th>Nilai</th>
-
-                  </tr>
-                </tfoot>
                 <tbody>
 
                 </tbody>
@@ -135,9 +130,8 @@
           </div>
         </div>
 
-        <div class="row my-6"
-        style="margin-bottom: 250px;">
-          <a href="" class="btn btn-primary mx-auto col-lg-6 my-6">Detail Perhitungan</a>
+        <div class="row my-6" style="margin-bottom: 250px;">
+          <a href="detailWP.html" class="btn btn-primary mx-auto col-lg-6 my-6">Detail Perhitungan</a>
         </div>
 
       </div>
@@ -215,6 +209,71 @@
   <!-- Page level custom scripts -->
 
   <script src="js/demo/chart-bar-demo.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+
+    const { createClient } = supabase
+    const supabaseUrl = 'https://cqdqanjdrrsokpnjpjpj.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxZHFhbmpkcnJzb2twbmpwanBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMyMjIxNzIsImV4cCI6MjA0ODc5ODE3Mn0.mldA8vWRcbH-vikkKDBz836-l8p_2lhKkP9STZ1l2b4'
+
+    const _supabase = createClient(supabaseUrl, supabaseKey)
+
+    console.log(_supabase);
+
+    async function getAllRekomendedCourse(params) {
+      let { data, error } = await _supabase
+        .from('WP_vektor_v')
+        .select(`
+      * ,
+      alternatif (
+      *
+      )
+      `).order('nilai', { ascending: false });
+
+      // console.log(data)
+      document.querySelector('#course-title').innerText = data[0].alternatif.nama_alternatif
+      document.querySelector('#course-percentage').innerText = data[0].nilai
+      document.querySelector('#course-img').src = data[0].alternatif.url_gambar
+
+      const kode_alternatif = data[0].kode_alternatif;
+
+      console.log(kode_alternatif);
+      let { data: krit, error: error2 } = await _supabase.rpc('get_top_alternative')
+
+
+
+
+      console.log(krit)
+
+
+
+
+
+
+      // console.log(kritfiltered)
+      document.querySelector('#krit-body').innerHTML = "";
+
+      krit.forEach(item => {
+        // Loop untuk setiap skala di dalam skala_kriteria
+
+        const row = document.createElement('tr');
+
+        // Kolom nama_kriteria hanya diisi di baris pertama
+        row.innerHTML = `
+      <td colspan="5">${item.nama_kriteria}</td>
+      <td>${item.keterangan}</td>
+    `;
+
+        document.querySelector('#krit-body').appendChild(row);
+
+      });
+
+
+    }
+
+    getAllRekomendedCourse()
+  </script>
 </body>
 
 </html>
