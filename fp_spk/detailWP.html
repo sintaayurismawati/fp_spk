@@ -46,7 +46,7 @@
       <hr class="sidebar-divider" />
 
       <li class="nav-item active">
-        <a class="nav-link" href="index.html">
+        <a class="nav-link" href="own_html/kriteria.html">
           <i class="fa fa-list-ol"></i>
           <span>Kriteria</span></a>
       </li>
@@ -55,7 +55,7 @@
       <hr class="sidebar-divider" />
 
       <li class="nav-item active">
-        <a class="nav-link" href="index.html">
+        <a class="nav-link" href="own_html/alternatif.html">
           <i class="fa fa-book"></i>
           <span>Alternatif</span></a>
       </li>
@@ -64,7 +64,7 @@
       <hr class="sidebar-divider" />
 
       <li class="nav-item active">
-        <a class="nav-link" href="index.html">
+        <a class="nav-link" href="rek-detail.html">
           <i class="fa fa-star"></i>
           <span>Rekomendasi & WP</span></a>
       </li>
@@ -73,7 +73,7 @@
       <hr class="sidebar-divider" />
 
       <li class="nav-item active">
-        <a class="nav-link" href="index.html">
+        <a class="nav-link" href="ahp.html">
           <i class="fa fa-calculator"></i>
           <span>Perhitungan AHP</span></a>
       </li>
@@ -99,7 +99,7 @@
 
         <div class="row w-75 mx-auto p-3">
 
-          <div class="card w-100 mb-3 shadow"   style="  overflow-x: scroll;">
+          <div class="card w-100 mb-3 shadow" style="  overflow-x: scroll;">
             <div class="card-head">
               <h3 class="m-3">Metrix</h3>
             </div>
@@ -141,15 +141,9 @@
             height: fit-content;">
               <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                  <thead>
-                    <tr>
-                      <th>Kode Alternatif</th>
-                      <th>Kode Kriteria</th> <!-- Gabungkan lima kolom ke samping -->
-                      <th>Nilai</th> <!-- Gabungkan dua baris ke bawah -->
-                      <th>S</th> <!-- Gabungkan lima kolom ke samping -->
+                  <thead id="header-s">
 
 
-                    </tr>
                   </thead>
                   <tbody id="body-s">
 
@@ -285,6 +279,7 @@
 
       const { data: ahp, error: error3 } = await _supabase.rpc('get_pivot_ahp_matriks')
 
+      console.log('hai')
       console.log(ahp)
 
       const { data: kriteria, error } = await _supabase
@@ -370,7 +365,7 @@
         });
 
 
-        
+
         // Kolom bobot
         const tdBobot = document.createElement('td');
         tdBobot.textContent = row.bobot.toFixed(2); // Format bobot menjadi dua desimal
@@ -392,23 +387,82 @@
 
     }
 
-    async function getAllVektorS(params) {
-      const { data: vektorS, error } = await _supabase
-        .from('WP_vektor_s')
-        .select(`*`);
+    async function getAllVektorS() {
+      try {
+        // Fetch data from the function `wp_vektor_s_report`
+        const { data: vektorS, error } = await _supabase.rpc('wp_vektor_s_report');
 
-      vektorS.forEach((item, index) => {
-        const te = document.createElement("tr");
-        te.innerHTML = `
-          <td>${item.kode_alternatif}</td>
-          <td>${item.kode_kriteria}</td>
-          <td>${item.nilai}</td>
-          <td>${item.s}</td>
+        if (error) {
+          console.error('Error fetching data:', error);
+          return;
+        }
 
-        `;
-        document.querySelector('#body-s').appendChild(te);
-      })
+        if (!vektorS || vektorS.length === 0) {
+          console.error('No data available.');
+          return;
+        }
+
+        console.log(vektorS)
+        // Extract headers dynamically from the first record
+        const headerRow = document.querySelector('#header-s');
+
+        let th = document.createElement('th');
+        th.textContent = 'Kriteria'; // Use Alternatif names dynamically
+        headerRow.appendChild(th);
+
+
+        const firstAlternatifValues = Object.keys(vektorS[0].Alternatif_Values);
+        firstAlternatifValues.forEach((alt, index) => {
+
+
+          const th = document.createElement('th');
+          th.textContent = alt; // Use Alternatif names dynamically
+          headerRow.appendChild(th);
+
+
+        });
+
+        // Clear existing rows in the table
+        const tbody = document.querySelector('#body-s');
+        tbody.innerHTML = '';
+
+        // Populate the table dynamically
+        vektorS.forEach((item) => {
+          const { Kriteria, Alternatif_Values } = item;
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+        <td>${Kriteria}</td>
+        ${Object.values(Alternatif_Values)
+              .map((value) => `<td>${value}</td>`)
+              .join('')}
+      `;
+          tbody.appendChild(tr);
+        });
+
+        // Add the last row for "S" values
+        const totalRow = document.createElement('tr');
+        totalRow.innerHTML = `
+      <td><strong>S</strong></td>
+      ${firstAlternatifValues
+            .map(
+              (alt) =>
+                `<td>${vektorS.reduce(
+                  (sum, item) => sum + (item.Alternatif_Values[alt] || 0),
+                  0
+                ).toFixed(4)}</td>`
+            )
+            .join('')}
+    `;
+        tbody.appendChild(totalRow);
+      } catch (error) {
+        console.error('An unexpected error occurred:', error);
+      }
     }
+
+    // Call the function when needed
+
+
     async function getAllVektorV(params) {
       const { data: vektorS, error } = await _supabase
         .from('WP_vektor_v')

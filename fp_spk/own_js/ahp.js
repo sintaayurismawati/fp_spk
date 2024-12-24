@@ -3,7 +3,37 @@ const supabaseKey =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxZHFhbmpkcnJzb2twbmpwanBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMyMjIxNzIsImV4cCI6MjA0ODc5ODE3Mn0.mldA8vWRcbH-vikkKDBz836-l8p_2lhKkP9STZ1l2b4";
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-let rataNormalisasi 
+
+
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    // Initialize Supabase client
+    
+
+    // Call the required RPC functions on page load
+    const rpcFunctions = [
+      "fn_update_hasil_perkalian_matriks_new_2",
+      "fn_update_jumlah_perkalian_matriks_fix",
+      "update_ahp_uji_konsistensi_fix"
+    ];
+
+    for (const fn of rpcFunctions) {
+      const { data, error } = await supabase.rpc(fn);
+      if (error) {
+        console.log(error)
+        console.error(`Error executing ${fn}:`, error);
+      } else {
+    
+        console.log(`${fn} executed successfully`, data);
+      }
+    }
+  } catch (err) {
+    console.error("Error during initialization: ", err);
+  }
+});
+
+
+let rataNormalisasi  =[]
 let jumlpMatrix = []
 async function loadTable() {
   const { data, error } = await supabase.rpc(
@@ -172,129 +202,72 @@ async function loadTable2() {
 }
 
 async function loadTable3() {
-  const { data, error } = await supabase.rpc("get_ahp_perbandingan_kriteria");
+  const { data, error } = await supabase.from("AHP_matriks").select('*');
 
   if (error) {
     console.error("Error fetching data:", error);
     return;
   }
 
-  const criteria = ["Biaya Berlangganan", "Fasilitas", "Promo", "Bayaran Cicilan"];
+  console.log('hbabi')
+  console.log(data)
+
+  const criteria = ["Biaya Terendah", "Kelengkapan Fasilitas Course", "Promo", "Bayaran Cicilan"];
   const tableBody = document.querySelector("#perkalian tbody");
 
-  const rowAverages = []; // Untuk menyimpan rata-rata setiap baris
-  const columnSums = Array(criteria.length).fill(0); // Untuk menyimpan jumlah setiap kolom hasil perkalian
-
-  // Iterasi melalui setiap baris
+  // Loop through the criteria and data to create the rows
   criteria.forEach((rowName, rowIndex) => {
     const row = document.createElement("tr");
     row.innerHTML = `<th>${rowName}</th>`;
 
-    let rowSum = 0; // Untuk jumlah nilai normalisasi per baris
-    let validCellCount = 0; // Untuk menghitung jumlah sel yang valid
-    const rowMatrix = []; // Untuk menyimpan hasil matriks perkalian per baris
+    let rowSum = 0; // To store the sum of 'jumlah_normalisasi' for each row
 
-    // Iterasi melalui setiap kolom
+    // Loop through each column (criteria) for the current row
     criteria.forEach((colName, colIndex) => {
-      const cellOriginal = document.createElement("td");
-      const cellNormalized = document.createElement("td");
-
       const kodeKriteria = `C${rowIndex + 1}`;
       const kodeKriteriaPembanding = `C${colIndex + 1}`;
 
-      const nilai = data.find(
+      // Find the corresponding data for 'nilai_normalisasi' and 'jumlah_normalisasi'
+      const item = data.find(
         (item) =>
           item.kode_kriteria === kodeKriteria &&
           item.kode_kriteria_pembanding === kodeKriteriaPembanding
-      )?.nilai || 0;
+      );
 
-      const jumlah = data.find(
-        (item) =>
-          item.kode_kriteria === kodeKriteria &&
-          item.kode_kriteria_pembanding === kodeKriteriaPembanding
-      )?.jumlah || 0;
+      const nilaiNormalisasi = item?.nilai_normalisasi || 0;
+      const jumlahNormalisasi = item?.jumlah_perkalian_matriks || 0;
 
-      let nilaiNormalisasi = 0;
-      if (jumlah !== 0) {
-        nilaiNormalisasi = nilai / jumlah;
+      rataNormalisasi.push(jumlahNormalisasi)
+      console.log(rataNormalisasi)
+
+      // Add 'nilai_normalisasi' to the row (only showing this value)
+      const cellNormalized = document.createElement("td");
+      cellNormalized.textContent = nilaiNormalisasi.toFixed(4);
+      row.appendChild(cellNormalized);
+
+      // Add to the row sum for 'jumlah_normalisasi'
+      if (colIndex === criteria.length - 1) {
+        rowSum += jumlahNormalisasi;
       }
-
-      // Tambahkan nilai asli ke kolom
-      cellOriginal.textContent = nilai.toFixed(4);
-      row.appendChild(cellOriginal);
-
-      // Tambahkan nilai normalisasi ke total baris
-      if (nilaiNormalisasi !== 0) {
-        rowSum += nilaiNormalisasi;
-        validCellCount++;
-      }
-
-      // Simpan nilai normalisasi untuk hasil perkalian matriks
-      rowMatrix.push(nilaiNormalisasi);
     });
 
-    // Hitung rata-rata per baris (Bobot)
-    const rowAverage = validCellCount > 0 ? rowSum / validCellCount : 0;
-    rowAverages.push(rowAverage);
-
-    // Tambahkan kolom "x Bobot"
-    const bobotCell = document.createElement("td");
-    bobotCell.textContent = rowAverage.toFixed(4);
-    row.appendChild(bobotCell);
-
-    // Hasil perkalian matriks (nilai normalisasi * bobot)
-    let rowMultiplicationSum = 0;
-    rowMatrix.forEach((nilaiNormalisasi, colIndex) => {
-      const result = nilaiNormalisasi * rowAverage;
-
-      const resultCell = document.createElement("td");
-      resultCell.textContent = result.toFixed(4);
-      row.appendChild(resultCell);
-
-      // Tambahkan hasil ke jumlah kolom
-      columnSums[colIndex] += result;
-
-      // Tambahkan ke total hasil perkalian matriks per baris
-      rowMultiplicationSum += result;
-    });
-
-    // Tambahkan kolom "Jumlah" untuk hasil perkalian matriks per baris
+    // Add the 'jumlah_normalisasi' as the last column for the current row
     const totalCell = document.createElement("td");
-    totalCell.textContent = rowMultiplicationSum.toFixed(4);
+    totalCell.textContent = rowSum.toFixed(4);
     row.appendChild(totalCell);
 
-    jumlpMatrix.push(rowMultiplicationSum.toFixed(4));
-
+    // Append the row to the table body
     tableBody.appendChild(row);
-  });
-
-
-
-  columnSums.forEach((colSum) => {
-    const totalCell = document.createElement("td");
-    totalCell.textContent = colSum.toFixed(4);
     
   });
-
-  // Kolom kosong untuk "x Bobot" dan "Jumlah"
-  const emptyCell = document.createElement("td");
-  emptyCell.textContent = "-";
-  
-  const emptyCell2 = document.createElement("td");
-  emptyCell2.textContent = "-";
-
-
- rataNormalisasi = rowAverages
- 
- console.log('yayuk')
- console.log(rataNormalisasi)
- console.log('yayuk2')
- console.log(jumlpMatrix)
- loadTable4();
+  loadTable4()
 }
 
 
+
+
 async function loadTable4() {
+  const { data, error } = await supabase.from("AHP_uji_konsistensi").select('*');
   const criteria = ["Biaya Berlangganan", "Fasilitas", "Promo", "Bayaran Cicilan"];
   const tableBody = document.querySelector("#ukk tbody");
 
@@ -306,9 +279,9 @@ async function loadTable4() {
   const row = document.createElement("tr");
 
   // Tambahkan nilai rata-rata normalisasi dikalikan dengan jumlah matrix
-  rataNormalisasi.forEach((rata, index) => {
+  data.forEach((rata, index) => {
     const cell = document.createElement("td");
-    const value = rata / jumlpMatrix[index];
+    const value = rata.nilai;
     cell.textContent = value.toFixed(4);
     row.appendChild(cell);
 
@@ -318,23 +291,23 @@ async function loadTable4() {
 
   // Kolom "Jumlah"
   const jumlahCell = document.createElement("td");
-  jumlahCell.textContent = totalJumlah.toFixed(4);
+  jumlahCell.textContent = data[0].jumlah.toFixed(4);
   row.appendChild(jumlahCell);
 
   // Kolom "t" (rata-rata dari total "Jumlah")
-  const tValue = totalJumlah / criteria.length;
+  const tValue = data[0].t;
   const tCell = document.createElement("td");
   tCell.textContent = tValue.toFixed(4);
   row.appendChild(tCell);
 
   // Kolom "C1" ((t - 4) / 3)
-  const c1Value = (tValue - 4) / 3;
+  const c1Value = data[0].CI;
   const c1Cell = document.createElement("td");
   c1Cell.textContent = c1Value.toFixed(4);
   row.appendChild(c1Cell);
 
   // Kolom "CR" (C1 / 1.45)
-  const crValue = c1Value / 1.45;
+  const crValue = data[0].CR;
   const crCell = document.createElement("td");
   crCell.textContent = crValue.toFixed(4);
   row.appendChild(crCell);

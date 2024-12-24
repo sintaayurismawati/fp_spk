@@ -46,7 +46,7 @@
       <hr class="sidebar-divider" />
 
       <li class="nav-item active">
-        <a class="nav-link" href="index.html">
+        <a class="nav-link" href="own_html/kriteria.html">
           <i class="fa fa-list-ol"></i>
           <span>Kriteria</span></a>
       </li>
@@ -55,7 +55,7 @@
       <hr class="sidebar-divider" />
 
       <li class="nav-item active">
-        <a class="nav-link" href="index.html">
+        <a class="nav-link" href="own_html/alternatif.html">
           <i class="fa fa-book"></i>
           <span>Alternatif</span></a>
       </li>
@@ -64,7 +64,7 @@
       <hr class="sidebar-divider" />
 
       <li class="nav-item active">
-        <a class="nav-link" href="rekomendasi.html">
+        <a class="nav-link" href="rek-detail.html">
           <i class="fa fa-star"></i>
           <span>Rekomendasi & WP</span></a>
       </li>
@@ -73,7 +73,7 @@
       <hr class="sidebar-divider" />
 
       <li class="nav-item active">
-        <a class="nav-link" href="index.html">
+        <a class="nav-link" href="ahp.html">
           <i class="fa fa-calculator"></i>
           <span>Perhitungan AHP</span></a>
       </li>
@@ -191,7 +191,7 @@
               <!--  -->
               <div id="bullet-pie" class="mt-4 text-end small d-flex flex-column flex-start col-lg-6 justify-content-around 
              ">
-                
+
               </div>
               <!--  -->
             </div>
@@ -328,36 +328,36 @@
 
 
     async function getAllKriteria() {
-    try {
-      // Mengambil data dari tabel `kriteria` di Supabase
-      const { data: kriteria, error } = await _supabase
-        .from('kriteria')
-        .select('*');
+      try {
+        // Mengambil data dari tabel `kriteria` di Supabase
+        const { data: kriteria, error } = await _supabase
+          .from('kriteria')
+          .select('*');
 
-      if (error) {
-        console.error("Error fetching kriteria:", error);
-        return;
-      }
+        if (error) {
+          console.error("Error fetching kriteria:", error);
+          return;
+        }
 
-      console.log("Data fetched:", kriteria);
+        console.log("Data fetched:", kriteria);
 
-      // Mendapatkan elemen <tbody> tabel dan <bulletPie>
-      const tbody = document.getElementById("kriteria-table-body");
-      const bulletPie = document.getElementById("bullet-pie");
+        // Mendapatkan elemen <tbody> tabel dan <bulletPie>
+        const tbody = document.getElementById("kriteria-table-body");
+        const bulletPie = document.getElementById("bullet-pie");
 
-      tbody.innerHTML = '';
-      bulletPie.innerHTML = '';
+        tbody.innerHTML = '';
+        bulletPie.innerHTML = '';
 
-      // Data untuk chart
-      const labels = [];
-      const dataValues = [];
-      const backgroundColors = [];
+        // Data untuk chart
+        const labels = [];
+        const dataValues = [];
+        const backgroundColors = [];
 
-      // Menambahkan baris ke tabel dan bullet ke dalam bulletPie
-      kriteria.forEach((item, index) => {
-        // Membuat elemen <tr> untuk tabel
-        const row = document.createElement("tr");
-        row.innerHTML = `
+        // Menambahkan baris ke tabel dan bullet ke dalam bulletPie
+        kriteria.forEach((item, index) => {
+          // Membuat elemen <tr> untuk tabel
+          const row = document.createElement("tr");
+          row.innerHTML = `
           <td>${item.kode_kriteria}</td>
           <td>${item.nama_kriteria}</td>
           <td>${item.prioritas}</td>
@@ -367,29 +367,29 @@
             <img width="100" src="${item.url_gambar}" alt="${item.nama_kriteria}" />
           </td>
         `;
-        tbody.appendChild(row);
+          tbody.appendChild(row);
 
-        // Membuat elemen bullet untuk legend
-        const span = document.createElement("span");
-        span.className = 'mr-2 h5';
-        span.innerHTML = `
+          // Membuat elemen bullet untuk legend
+          const span = document.createElement("span");
+          span.className = 'mr-2 h5';
+          span.innerHTML = `
           <i class="fas fa-circle" style="color: ${getColor(index)}"></i> ${item.nama_kriteria}
         `;
-        bulletPie.appendChild(span);
+          bulletPie.appendChild(span);
 
-        // Data untuk chart
-        labels.push(item.nama_kriteria);
-        dataValues.push(item.nilai_prioritas);
-        backgroundColors.push(getColor(index));
-      });
+          // Data untuk chart
+          labels.push(item.nama_kriteria);
+          dataValues.push(item.nilai_prioritas);
+          backgroundColors.push(getColor(index));
+        });
 
-      // Render Pie Chart
-      renderPieChart(labels, dataValues, backgroundColors);
-      renderBarChart(kriteria)
-    } catch (err) {
-      console.error("Unexpected error:", err);
+        // Render Pie Chart
+        renderPieChart(labels, dataValues, backgroundColors);
+        renderBarChart(kriteria)
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
     }
-  }
 
     // Panggil fungsi untuk memuat data
     getAllKriteria();
