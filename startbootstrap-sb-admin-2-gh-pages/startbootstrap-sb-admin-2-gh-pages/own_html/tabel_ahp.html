@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic Table</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h2 class="text-center">Perbandingan Kriteria</h2>
+      <table class="table table-bordered text-center" id="comparisonTable">
+        <thead class="table-dark">
+          <tr>
+            <th>Kriteria</th>
+            <th>Biaya Berlangganan</th>
+            <th>Fasilitas</th>
+            <th>Promo</th>
+            <th>Bayaran Cicilan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Data akan diisi oleh JavaScript -->
+        </tbody>
+        <tfoot>
+          <tr class="table-primary">
+            <th>Jumlah</th>
+            <td id="jumlahC1"></td>
+            <td id="jumlahC2"></td>
+            <td id="jumlahC3"></td>
+            <td id="jumlahC4"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const supabaseUrl = "https://cqdqanjdrrsokpnjpjpj.supabase.co";
+      const supabaseKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxZHFhbmpkcnJzb2twbmpwanBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMyMjIxNzIsImV4cCI6MjA0ODc5ODE3Mn0.mldA8vWRcbH-vikkKDBz836-l8p_2lhKkP9STZ1l2b4";
+      const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+      async function loadTable() {
+        const { data, error } = await supabase.rpc(
+          "get_ahp_perbandingan_kriteria"
+        );
+
+        if (error) {
+          console.error("Error fetching data:", error);
+          return;
+        }
+
+        // Memproses data untuk menampilkan dalam bentuk tabel
+        const criteria = [
+          "Biaya Berlangganan",
+          "Fasilitas",
+          "Promo",
+          "Bayaran Cicilan",
+        ];
+        const tableBody = document.querySelector("#comparisonTable tbody");
+        const totals = { C1: 0, C2: 0, C3: 0, C4: 0 };
+
+        criteria.forEach((rowName, rowIndex) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<th>${rowName}</th>`;
+
+          criteria.forEach((colName, colIndex) => {
+            const cell = document.createElement("td");
+            const kodeKriteria = `C${rowIndex + 1}`;
+            const kodeKriteriaPembanding = `C${colIndex + 1}`;
+            const nilai =
+              data.find(
+                (item) =>
+                  item.kode_kriteria === kodeKriteria &&
+                  item.kode_kriteria_pembanding === kodeKriteriaPembanding
+              )?.nilai || 0;
+
+            cell.textContent = nilai;
+            row.appendChild(cell);
+
+            if (rowIndex === colIndex)
+              totals[`C${rowIndex + 1}`] =
+                data.find((item) => item.kode_kriteria === kodeKriteria)
+                  ?.jumlah || 0;
+          });
+
+          tableBody.appendChild(row);
+        });
+
+        // Menambahkan nilai jumlah di baris footer
+        document.getElementById("jumlahC1").textContent = totals.C1;
+        document.getElementById("jumlahC2").textContent = totals.C2;
+        document.getElementById("jumlahC3").textContent = totals.C3;
+        document.getElementById("jumlahC4").textContent = totals.C4;
+      }
+
+      loadTable();
+    </script>
+  </body>
+</html>

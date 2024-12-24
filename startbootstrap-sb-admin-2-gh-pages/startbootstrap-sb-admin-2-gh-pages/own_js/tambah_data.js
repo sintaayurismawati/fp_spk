@@ -171,7 +171,7 @@ async function tambahDataKriteria() {
     return;
   }
 
-  const gambarUrl = `https://cqdqanjdrrsokpnjpjpj.supabase.co/storage/v1/object/public/${storageData.path}`;
+  const gambarUrl = `https://cqdqanjdrrsokpnjpjpj.supabase.co/storage/v1/object/public/fp_spk/${storageData.path}`;
 
   // Simpan data kriteria ke database
   const { data, error } = await supabase.rpc("insert_data_kriteria", {

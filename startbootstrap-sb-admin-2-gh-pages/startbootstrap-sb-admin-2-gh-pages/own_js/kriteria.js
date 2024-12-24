@@ -7,7 +7,7 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 fetchAllKriteria();
 
 async function fetchAllKriteria() {
-  let { data, error } = await supabase.rpc("get_all_kriteria");
+  let { data, error } = await supabase.rpc("get_kriteria_with_bobot");
   if (error) console.error(error);
   else console.log(data);
 
