@@ -10,13 +10,15 @@ const urlParams = new URLSearchParams(queryString);
 const kriteriaId = urlParams.get("id");
 console.log("Kriteria ID:", kriteriaId);
 
+let kodeKriteriaGlobal = null;
+
 // Memanggil data detail kriteria
 fetchDetailKriteria(kriteriaId);
 
 async function fetchDetailKriteria(kriteriaId) {
   try {
     // Memanggil fungsi RPC dari Supabase
-    let { data, error } = await supabase.rpc("get_detail_kriteria", {
+    let { data, error } = await supabase.rpc("get_kriteria_details", {
       k_id: kriteriaId,
     });
 
@@ -29,6 +31,8 @@ async function fetchDetailKriteria(kriteriaId) {
 
     // Proses hanya baris pertama dari data
     if (data && data.length > 0) {
+      const detailKriteriaa = data[0];
+      kodeKriteriaGlobal = detailKriteriaa.kode_kriteria; // Menyimpan kode kriteria
       showDetailKriteria(data[0]); // Hanya baris pertama
       showSkalaKriteria(data);
     } else {
@@ -82,3 +86,63 @@ function showSkalaKriteria(listSkala) {
     skalaKriteriaContainer.appendChild(skalaData);
   });
 }
+
+// Fungsi untuk menghapus kriteria
+// async function deleteKriteria(kodeKriteria) {
+//   try {
+//     const { data, error } = await supabase.rpc("delete_ahp_data", {
+//       kode_kriteria_param: kodeKriteria,
+//     });
+
+//     if (error) {
+//       console.error("Error deleting data:", error);
+//       alert("Gagal menghapus data kriteria.");
+//       return;
+//     }
+
+//     alert("Data kriteria berhasil dihapus.");
+//     // Redirect setelah berhasil menghapus
+//     window.location.href = "kriteria.html"; // Gantilah dengan URL tujuan setelah penghapusan
+//   } catch (err) {
+//     console.error("Unexpected error:", err);
+//     alert("Terjadi kesalahan saat menghapus data.");
+//   }
+// }
+
+
+// Fungsi untuk menghapus kriteria
+async function deleteKriteria(kodeKriteria) {
+  // Menampilkan pop-up konfirmasi sebelum menghapus
+  const isConfirmed = window.confirm(`Apakah Anda yakin ingin menghapus kriteria dengan kode ${kodeKriteria}?`);
+
+  if (!isConfirmed) {
+    console.log("Penghapusan dibatalkan.");
+    return; // Menghentikan eksekusi jika tidak dikonfirmasi
+  }
+
+  try {
+    const { data, error } = await supabase.rpc("delete_ahp_data", {
+      kode_kriteria_param: kodeKriteria,
+    });
+
+    if (error) {
+      console.error("Error deleting data:", error);
+      alert("Gagal menghapus data kriteria.");
+      return;
+    }
+
+    alert("Data kriteria berhasil dihapus.");
+    // Redirect setelah berhasil menghapus
+    window.location.href = "kriteria.html"; // Gantilah dengan URL tujuan setelah penghapusan
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    alert("Terjadi kesalahan saat menghapus data.");
+  }
+}
+
+// // Event listener untuk tombol submit
+document
+  .getElementById("deleteButton")
+  .addEventListener("click", async function () {
+    deleteKriteria(kodeKriteriaGlobal);
+  });
